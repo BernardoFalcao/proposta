@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAE 2026 – Sua Proposta Exclusiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g1:#0a1a10;--green-mid:#2d6a4f;--green:#40916c;--green-bright:#52b788;
+  --gold:#c9a84c;--gold-light:#e8c96a;--cream:#f8f4ed;--white:#fff;
+  --muted:rgba(248,244,237,.5);--red:#e05c5c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--g1);color:var(--cream);overflow-x:hidden;min-height:100vh}
+
+#pcvs{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5}
+
+.pgwrap{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:1000}
+.pgfill{height:100%;background:linear-gradient(90deg,var(--green-bright),var(--gold),var(--green-bright));background-size:200% 100%;transition:width .8s cubic-bezier(.4,0,.2,1);animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:0 0}100%{background-position:200% 0}}
+
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;z-index:10;overflow-y:auto}
+.screen.active{display:flex}
+.screen.eu{animation:eu .6s cubic-bezier(.16,1,.3,1) both}
+.screen.ed{animation:ed .6s cubic-bezier(.16,1,.3,1) both}
+.screen.es{animation:es .5s cubic-bezier(.16,1,.3,1) both}
+.screen.xu{animation:xu .32s ease both}
+.screen.xd{animation:xd .32s ease both}
+@keyframes eu{from{opacity:0;transform:translateY(55px)}to{opacity:1;transform:none}}
+@keyframes ed{from{opacity:0;transform:translateY(-55px)}to{opacity:1;transform:none}}
+@keyframes es{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:none}}
+@keyframes xu{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-55px)}}
+@keyframes xd{from{opacity:1;transform:none}to{opacity:0;transform:translateY(55px)}}
+
+.card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:2.5rem;backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,.35);max-width:640px;width:100%;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.5),transparent)}
+
+.eyebrow{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem}
+.txl{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;line-height:1.1;color:var(--white)}
+.txl .g{color:var(--gold)}
+.tlg{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:700;line-height:1.25;color:var(--white)}
+.tlg .g{color:var(--gold)}
+.desc{color:var(--muted);font-size:.95rem;line-height:1.65;margin-top:.6rem}
+
+.logo-ring{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--green-mid),#0d2118);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:.85rem;color:var(--gold);margin:0 auto 1.5rem;box-shadow:0 0 0 8px rgba(201,168,76,.06),0 0 40px rgba(201,168,76,.15);animation:plogo 4s ease-in-out infinite;text-align:center;line-height:1.3}
+@keyframes plogo{0%,100%{box-shadow:0 0 0 8px rgba(201,168,76,.06),0 0 40px rgba(201,168,76,.15)}50%{box-shadow:0 0 0 14px rgba(201,168,76,.03),0 0 60px rgba(201,168,76,.28)}}
+
+.nfw{max-width:340px;margin:1.8rem auto 1.2rem}
+.nfi{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.25);border-radius:14px;padding:1rem 1.4rem;font-size:1.05rem;font-family:'DM Sans',sans-serif;color:var(--white);outline:none;transition:border-color .3s,box-shadow .3s}
+.nfi::placeholder{color:rgba(255,255,255,.25)}
+.nfi:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.1)}
+.nfi.error{border-color:var(--red) !important;box-shadow:0 0 0 4px rgba(224,92,92,.15) !important;animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+.field-err{color:var(--red);font-size:.78rem;margin-top:.4rem;display:none;text-align:center}
+.field-err.show{display:block}
+.opts-err{color:var(--red);font-size:.78rem;margin:.5rem 0 0;display:none}
+.opts-err.show{display:block}
+
+/* BACK BUTTON */
+.btn-back{background:transparent;border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem 1rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem;margin-bottom:1rem}
+.btn-back:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.75);transform:translateX(-2px)}
+
+/* STEP PILL ROW */
+.step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.step-row-start{display:flex;align-items:center;margin-bottom:1.2rem}
+
+.spill{display:inline-flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:.35rem 1rem;font-family:'Space Mono',monospace;font-size:.62rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.sdots{display:flex;gap:4px}
+.sd{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .4s}
+.sd.done{background:var(--green-bright)}
+.sd.active{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+
+/* BUTTONS */
+.bg{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0d2118;border:none;border-radius:12px;padding:.9rem 2.4rem;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.bg:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,.4)}
+.bg:active{transform:translateY(-1px)}
+
+/* OPTIONS */
+.og{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1.5rem 0}
+.og.s1{grid-template-columns:1fr}
+.opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:1rem 1.2rem;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;cursor:pointer;text-align:left;transition:all .22s ease}
+.opt .em{font-size:1.4rem;display:block;margin-bottom:.4rem}
+.opt .lb{font-weight:600;display:block;margin-bottom:.15rem}
+.opt .sb{font-size:.76rem;color:rgba(255,255,255,.38)}
+.opt:hover{border-color:var(--green-bright);background:rgba(82,183,136,.1);transform:translateY(-2px)}
+.opt.sel{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.opt.sel .lb{color:var(--gold-light)}
+
+/* CHAT */
+#s-transition{justify-content:flex-start;padding-top:4rem}
+.cwrap{max-width:560px;width:100%}
+.mrow{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:1rem;opacity:0;transform:translateY(16px);transition:opacity .4s,transform .4s}
+.mrow.vis{opacity:1;transform:none}
+.av{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--green-mid),var(--green));border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;color:var(--white)}
+.bub{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.1);border-radius:4px 16px 16px 16px;padding:.85rem 1.15rem;font-size:.93rem;line-height:1.6;max-width:440px}
+.bub strong{color:var(--gold-light)}.bub em{color:var(--green-bright);font-style:normal}
+.typd{display:flex;gap:5px;padding:.85rem 1rem;background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.1);border-radius:4px 16px 16px 16px;width:fit-content}
+.typd span{width:7px;height:7px;border-radius:50%;background:var(--green-bright);opacity:.5;animation:tb 1.2s ease infinite}
+.typd span:nth-child(2){animation-delay:.2s}.typd span:nth-child(3){animation-delay:.4s}
+@keyframes tb{0%,80%,100%{transform:scale(.7);opacity:.35}40%{transform:scale(1);opacity:1}}
+
+/* SPEAKERS */
+#s-step4{justify-content:flex-start;padding-top:2rem;padding-bottom:2rem;overflow-y:auto}
+.speakers-wrap{max-width:700px;width:100%}
+.speakers-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.spk-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:1.2rem;position:relative;overflow:hidden;opacity:0;transform:translateY(24px);transition:all .35s ease}
+.spk-card.vis{opacity:1;transform:none}
+.spk-card:hover{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05);transform:translateY(-2px)}
+.spk-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--green-bright))}
+.spk-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--green-mid),var(--green));border:2px solid rgba(201,168,76,.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:.7rem;font-family:'Playfair Display',serif}
+.spk-name{font-weight:700;font-size:.92rem;color:var(--white);margin-bottom:.15rem;line-height:1.2}
+.spk-role{font-size:.7rem;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:.45rem}
+.spk-desc{font-size:.78rem;color:var(--muted);line-height:1.5}
+.spk-match{display:inline-flex;align-items:center;gap:.3rem;background:rgba(82,183,136,.12);border:1px solid rgba(82,183,136,.3);border-radius:6px;padding:.2rem .55rem;font-size:.66rem;color:var(--green-bright);font-weight:600;margin-top:.6rem}
+.more-box{text-align:center;padding:1rem;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:14px;font-size:.86rem;color:var(--muted)}
+.more-box strong{color:var(--gold-light)}
+.spk-intro{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem}
+.spk-intro strong{color:var(--gold-light)}
+
+/* PROPOSAL */
+#s-proposal{justify-content:flex-start;padding-top:2rem;padding-bottom:3rem;overflow-y:auto}
+.pinn{max-width:660px;width:100%}
+.phero{text-align:center;margin-bottom:2rem}
+.gname{background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--green-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.bitem{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:.9rem;color:rgba(248,244,237,.82);opacity:0;transform:translateX(-16px);transition:opacity .4s,transform .4s}
+.bitem.vis{opacity:1;transform:none}
+.bitem:last-child{border-bottom:none}
+.ck{color:var(--green-bright);flex-shrink:0;margin-top:1px;font-weight:700}
+.priceblk{background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(82,183,136,.05));border:1px solid rgba(201,168,76,.28);border-radius:20px;padding:2rem;text-align:center;margin:1.5rem 0}
+.plbl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:.6rem}
+.pold{font-size:.9rem;color:rgba(255,255,255,.3);text-decoration:line-through;margin-bottom:.4rem}
+.pmainw{display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;margin:.5rem 0}
+.pbox .flbl{font-size:.7rem;color:rgba(255,255,255,.35);font-family:'Space Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:.2rem}
+.pbig{font-family:'Playfair Display',serif;font-weight:900;line-height:1;color:var(--gold)}
+.pbig.stk{color:rgba(255,255,255,.25);text-decoration:line-through}
+.pbig .pre{font-size:1.2rem;vertical-align:super}
+.pbig .num{font-size:3.4rem}
+.pbig .cts{font-size:1.5rem;vertical-align:super}
+.parr{font-size:2rem;color:var(--green-bright);align-self:center;animation:ap 1.5s ease infinite}
+@keyframes ap{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.pboxn .pbig{color:var(--green-bright)}
+.por{font-size:.8rem;color:rgba(255,255,255,.25);margin:.8rem 0}
+.pvista{font-size:1.5rem;font-weight:700;color:var(--green-bright)}
+.pvista small{font-size:.85rem;font-weight:400;color:rgba(255,255,255,.4)}
+.urgrow{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:1rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:.6rem 1rem}
+.urgrow span{font-size:.82rem;color:var(--gold-light);font-family:'Space Mono',monospace;letter-spacing:1px}
+.bcta{display:block;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0d2118;border:none;border-radius:16px;padding:1.15rem 2rem;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;text-align:center;text-decoration:none;transition:transform .25s,box-shadow .25s;box-shadow:0 8px 30px rgba(201,168,76,.28);margin-bottom:.5rem}
+.bcta:hover{transform:translateY(-3px);box-shadow:0 16px 50px rgba(201,168,76,.42)}
+.ibox{background:rgba(82,183,136,.07);border:1px solid rgba(82,183,136,.2);border-left:3px solid var(--green-bright);border-radius:12px;padding:1.1rem 1.3rem;font-size:.88rem;line-height:1.65;color:rgba(248,244,237,.82);margin:1.2rem 0}
+.ibox strong{color:var(--green-bright)}
+.tag{display:inline-block;background:rgba(82,183,136,.12);border:1px solid rgba(82,183,136,.3);border-radius:8px;padding:.25rem .7rem;font-size:.76rem;color:var(--green-bright);font-weight:600;margin:.2rem}
+.dchip{display:inline-flex;align-items:center;gap:.4rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:.35rem .8rem;font-size:.78rem;color:var(--gold-light);margin-bottom:1rem}
+.bcor{position:absolute;top:-1px;right:-1px;background:var(--gold);color:#0d2118;font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;padding:.4rem .75rem;border-radius:0 24px 0 12px;letter-spacing:1px}
+
+.lbg{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.lbg .l{position:absolute;font-size:10rem;opacity:.025;animation:fl 15s ease-in-out infinite}
+.lbg .l:nth-child(1){top:-3rem;left:-3rem;font-size:16rem}
+.lbg .l:nth-child(2){bottom:-4rem;right:-2rem;animation-delay:7s;font-size:12rem}
+.lbg .l:nth-child(3){top:40%;left:70%;animation-delay:3s;font-size:8rem;opacity:.015}
+@keyframes fl{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-25px) rotate(6deg)}}
+.cpc{position:fixed;pointer-events:none;z-index:9999;animation:cfall 2.5s ease-in forwards}
+@keyframes cfall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+@media(max-width:520px){.og{grid-template-columns:1fr}.card{padding:1.6rem 1.4rem}.pmainw{gap:1rem}.pbig .num{font-size:2.6rem}.speakers-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="pcvs"></canvas>
+<div class="lbg"><div class="l">🌿</div><div class="l">🌿</div><div class="l">🌿</div></div>
+<div class="pgwrap"><div class="pgfill" id="pgf" style="width:0%"></div></div>
+
+<!-- INTRO -->
+<div class="screen active es" id="s-intro">
+  <div style="text-align:center;max-width:600px">
+    <div class="logo-ring">DAE<br>2026</div>
+    <p class="eyebrow">✦ Convite Exclusivo ✦</p>
+    <h1 class="txl">Direito Ambiental<br><span class="g">Experience</span></h1>
+    <p class="desc" style="max-width:380px;margin:.6rem auto 0">O maior evento de Direito Ambiental do Brasil.<br>Preparamos uma experiência exclusiva para você.</p>
+    <div class="nfw">
+      <input type="text" id="iname" class="nfi" placeholder="Qual é o seu nome?" autocomplete="off"/>
+      <div class="field-err" id="nameErr">⚠ Por favor, informe seu nome para continuar.</div>
+    </div>
+    <button class="bg" id="btnStart">Começar minha jornada →</button>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="screen" id="s-step1">
+  <div style="max-width:640px;width:100%">
+    <div class="step-row-start">
+      <div class="spill"><div class="sdots"><div class="sd active"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div></div>&nbsp;PASSO 1 DE 4</div>
+    </div>
+    <div class="card">
+      <div class="bcor">DAE 2026</div>
+      <div class="dchip">📅 29, 30 e 31 de Outubro · Florianópolis/SC</div>
+      <h2 class="tlg">Olá, <span class="g" id="hn">você</span>!<br>Como você atua hoje?</h2>
+      <p class="desc">Temos salas e palestrantes exclusivos para cada perfil.</p>
+      <div class="og" id="areaOpts">
+        <button class="opt" data-area="juridico"><span class="em">⚖️</span><span class="lb">Área Jurídica</span><span class="sb">Advogado(a), assessor(a)</span></button>
+        <button class="opt" data-area="tecnico"><span class="em">🌿</span><span class="lb">Técnico Ambiental</span><span class="sb">Eng., biólogo(a), consultor(a)</span></button>
+        <button class="opt" data-area="servidor"><span class="em">🏛️</span><span class="lb">Serviço Público</span><span class="sb">Servidor(a), analista</span></button>
+        <button class="opt" data-area="gestor"><span class="em">📊</span><span class="lb">Gestor / Empresário</span><span class="sb">ESG, compliance, negócios</span></button>
+      </div>
+      <div class="opts-err" id="areaErr">⚠ Selecione sua área de atuação para continuar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="screen" id="s-step2">
+  <div style="max-width:640px;width:100%">
+    <div class="step-row">
+      <button class="btn-back" id="backS2">← Voltar</button>
+      <div class="spill"><div class="sdots"><div class="sd done"></div><div class="sd active"></div><div class="sd"></div><div class="sd"></div></div>&nbsp;PASSO 2 DE 4</div>
+    </div>
+    <div class="card">
+      <h2 class="tlg">O que você mais busca<br>no <span class="g">DAE 2026</span>?</h2>
+      <p class="desc">Pode escolher mais de uma opção!</p>
+      <div class="og" id="objOpts">
+        <button class="opt" data-obj="conteudo"><span class="em">📚</span><span class="lb">Conteúdo prático</span><span class="sb">Cases reais, aplicação direta</span></button>
+        <button class="opt" data-obj="networking"><span class="em">🤝</span><span class="lb">Networking</span><span class="sb">Conexões que geram negócios</span></button>
+        <button class="opt" data-obj="atualizacao"><span class="em">🔄</span><span class="lb">Atualização técnica</span><span class="sb">Legislação e tendências</span></button>
+        <button class="opt" data-obj="posicionamento"><span class="em">🎯</span><span class="lb">Posicionamento</span><span class="sb">Crescer na área ambiental</span></button>
+      </div>
+      <div class="opts-err" id="objErr">⚠ Selecione pelo menos um objetivo para continuar.</div>
+      <button class="bg" id="btnStep3" style="width:100%;margin-top:1.2rem">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="screen" id="s-step3">
+  <div style="max-width:640px;width:100%">
+    <div class="step-row">
+      <button class="btn-back" id="backS3">← Voltar</button>
+      <div class="spill"><div class="sdots"><div class="sd done"></div><div class="sd done"></div><div class="sd active"></div><div class="sd"></div></div>&nbsp;PASSO 3 DE 4</div>
+    </div>
+    <div class="card">
+      <h2 class="tlg">Qual o seu maior<br><span class="g">desafio</span> hoje?</h2>
+      <p class="desc">Isso nos ajuda a mostrar como o DAE vai transformar sua atuação.</p>
+      <div class="og s1" style="margin-top:1.4rem" id="chOpts">
+        <button class="opt" data-ch="crescer"><span class="lb">🚀 Crescer e me posicionar melhor na área ambiental</span></button>
+        <button class="opt" data-ch="networking"><span class="lb">🌐 Ampliar meu networking com quem realmente atua no setor</span></button>
+        <button class="opt" data-ch="atualizacao"><span class="lb">📡 Acompanhar as mudanças e tendências do direito ambiental</span></button>
+        <button class="opt" data-ch="pratica"><span class="lb">⚙️ Transformar conhecimento teórico em atuação prática</span></button>
+      </div>
+      <div class="opts-err" id="chErr">⚠ Selecione seu principal desafio para continuar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4: SPEAKERS -->
+<div class="screen" id="s-step4">
+  <div class="speakers-wrap">
+    <div class="step-row">
+      <button class="btn-back" id="backS4">← Voltar</button>
+      <div class="spill"><div class="sdots"><div class="sd done"></div><div class="sd done"></div><div class="sd done"></div><div class="sd active"></div></div>&nbsp;PASSO 4 DE 4</div>
+    </div>
+    <div class="card" style="margin-bottom:1.2rem">
+      <h2 class="tlg" style="margin-bottom:.5rem">Palestrantes <span class="g">para você</span></h2>
+      <p class="spk-intro" id="spkIntro"></p>
+    </div>
+    <div class="speakers-grid" id="spkGrid"></div>
+    <div class="more-box" id="moreBox"></div>
+    <div style="text-align:center;margin-top:1.5rem">
+      <button class="bg" id="btnProposal">Ver minha proposta exclusiva →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSITION CHAT -->
+<div class="screen" id="s-transition">
+  <div class="cwrap" id="cwrap"></div>
+</div>
+
+<!-- PROPOSAL -->
+<div class="screen" id="s-proposal">
+  <div class="pinn">
+    <div class="phero">
+      <p class="eyebrow">✦ proposta exclusiva ✦</p>
+      <h2 class="txl">Sua vaga no DAE 2026,<br><span class="gname" id="pname">amigo(a)</span></h2>
+    </div>
+    <div class="card" style="margin-bottom:1.2rem">
+      <div class="bcor">LOTE 2</div>
+      <div id="stags" style="margin-bottom:1rem"></div>
+      <div class="ibox" id="ibox"></div>
+      <ul style="list-style:none" id="blist"></ul>
+    </div>
+    <div class="priceblk">
+      <p class="plbl">💚 investimento</p>
+      <p class="pold">de R$ 2.997,00</p>
+      <div class="pmainw">
+        <div class="pbox">
+          <div class="flbl">ERA</div>
+          <div class="pbig stk"><span class="pre">12×</span><span class="num">157</span><span class="cts">,00</span></div>
+        </div>
+        <div class="parr">→</div>
+        <div class="pbox pboxn">
+          <div class="flbl" style="color:var(--green-bright)">AGORA</div>
+          <div class="pbig"><span class="pre">12×</span><span class="num" id="pnum">157</span><span class="cts">,00</span></div>
+        </div>
+      </div>
+      <div class="por">— ou —</div>
+      <div class="pvista">R$ 1.497,00 <small>à vista</small></div>
+      <div class="urgrow"><span>🔒</span><span>VAGAS LIMITADAS · APENAS 500 PARTICIPANTES</span></div>
+    </div>
+
+    <a href="https://sun.eduzz.com/D0RAYO419Y?cupom=DAE26" target="_blank" class="bcta">🌿 Garantir minha vaga com desconto →</a>
+    <p style="text-align:center;font-size:.76rem;color:rgba(255,255,255,.3);margin-bottom:.8rem">
+      🏷️ Cupom <strong style="color:var(--gold-light)">DAE26</strong> aplicado automaticamente
+    </p>
+    <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.22);margin-bottom:2rem">
+      Florianópolis/SC · 29, 30 e 31 de outubro de 2026 · 100% presencial<br>
+      <span style="display:block;margin-top:.3rem">WhatsApp: (48) 3211-8489 · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="197a76776d786d76597d706b7c706d7678747b707c776d78757c61697c6b707c777a7c377a7674377b6b">[email&#160;protected]</a></span>
+    </p>
+  </div>
+</div>
+
+<script>
+function init() {
+
+// PARTICLES
+var cv=document.getElementById('pcvs'),cx=cv.getContext('2d'),pts=[];
+function rsz(){cv.width=innerWidth;cv.height=innerHeight;}rsz();window.addEventListener('resize',rsz);
+function mkp(){pts=[];var n=Math.floor(innerWidth/16);for(var i=0;i<n;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,a:Math.random()*.35+.05,c:Math.random()>.6?'#c9a84c':'#52b788'});}mkp();
+function animP(){cx.clearRect(0,0,cv.width,cv.height);for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=cv.width;if(p.x>cv.width)p.x=0;if(p.y<0)p.y=cv.height;if(p.y>cv.height)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=p.c;cx.globalAlpha=p.a;cx.fill();}cx.globalAlpha=1;requestAnimationFrame(animP);}animP();
+
+// STATE
+var S={name:'',area:'',objs:[],ch:''};
+var chLock=false,cur='s-intro';
+function pg(v){document.getElementById('pgf').style.width=v+'%';}
+
+// SCREEN ENGINE
+function goto(id,ein,xout){
+  ein=ein||'eu';xout=xout||'xu';
+  var c=document.getElementById(cur),n=document.getElementById(id);
+  c.classList.remove('eu','ed','es','xu','xd');c.classList.add(xout);
+  setTimeout(function(){
+    c.classList.remove('active','eu','ed','es','xu','xd');
+    n.classList.remove('eu','ed','es','xu','xd');
+    n.classList.add('active',ein);
+    window.scrollTo(0,0);cur=id;
+    var opts=n.querySelectorAll('.opt');
+    for(var i=0;i<opts.length;i++){(function(o,idx){
+      o.style.opacity='0';o.style.transform='translateY(18px)';
+      setTimeout(function(){o.style.transition='opacity .3s ease,transform .3s ease';o.style.opacity='1';o.style.transform='none';},70+idx*60);
+    })(opts[i],i);}
+  },330);
+}
+
+// ── INTRO ──
+document.getElementById('btnStart').addEventListener('click',function(){
+  var v=document.getElementById('iname').value.trim();
+  if(!v){
+    var f=document.getElementById('iname');f.classList.add('error');
+    document.getElementById('nameErr').classList.add('show');return;
+  }
+  document.getElementById('iname').classList.remove('error');
+  document.getElementById('nameErr').classList.remove('show');
+  S.name=v;document.getElementById('hn').textContent=v.split(' ')[0];
+  pg(15);goto('s-step1','eu','xu');
+});
+document.getElementById('iname').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btnStart').click();});
+document.getElementById('iname').addEventListener('input',function(){this.classList.remove('error');document.getElementById('nameErr').classList.remove('show');});
+
+// ── STEP 1 ──
+document.getElementById('areaOpts').addEventListener('click',function(e){
+  var btn=e.target.closest('.opt');if(!btn)return;
+  S.area=btn.dataset.area;
+  document.querySelectorAll('#areaOpts .opt').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+  document.getElementById('areaErr').classList.remove('show');
+  pg(30);setTimeout(function(){goto('s-step2','eu','xu');},420);
+});
+
+// ── STEP 2 ──
+document.getElementById('backS2').addEventListener('click',function(){pg(15);goto('s-step1','ed','xd');});
+document.getElementById('objOpts').addEventListener('click',function(e){
+  var btn=e.target.closest('.opt');if(!btn)return;
+  var obj=btn.dataset.obj,idx=S.objs.indexOf(obj);
+  if(idx===-1){S.objs.push(obj);btn.classList.add('sel');}
+  else{S.objs.splice(idx,1);btn.classList.remove('sel');}
+  document.getElementById('objErr').classList.remove('show');
+});
+document.getElementById('btnStep3').addEventListener('click',function(){
+  if(!S.objs.length){document.getElementById('objErr').classList.add('show');return;}
+  pg(48);goto('s-step3','eu','xu');
+});
+
+// ── STEP 3 ──
+document.getElementById('backS3').addEventListener('click',function(){pg(30);goto('s-step2','ed','xd');});
+document.getElementById('chOpts').addEventListener('click',function(e){
+  if(chLock)return;
+  var btn=e.target.closest('.opt');if(!btn)return;
+  chLock=true;S.ch=btn.dataset.ch;btn.classList.add('sel');
+  document.getElementById('chErr').classList.remove('show');
+  pg(65);setTimeout(buildSpeakers,420);
+});
+
+// ── STEP 4 ──
+document.getElementById('backS4').addEventListener('click',function(){chLock=false;pg(48);goto('s-step3','ed','xd');});
+
+// SPEAKERS DATA
+var SPEAKERS={
+  juridico:[
+    {ini:'CF',name:'Cláudio Farenzena',role:'Advogado Ambiental',desc:'Especialista em Direito Ambiental e Agronegócio, idealizador do DAE e fundador da Comunidade Ambiental.',match:'Direito Ambiental prático'},
+    {ini:'AS',name:'Alexandre Sion',role:'Nº 1 Nacional — Adv. Ambiental 2025',desc:'Eleito Advogado Ambiental do Ano 2025. 9 anos consecutivos em 1º lugar nacional em Direito Ambiental.',match:'Advocacia Ambiental'},
+    {ini:'CT',name:'Curt Trennepohl',role:'Ex-Presidente do IBAMA',desc:'Sócio fundador da Trennepohl Advogados. Referência em licenciamento e assessoria ambiental complexa.',match:'Licenciamento Ambiental'},
+    {ini:'MB',name:'Marcelo B. Dantas',role:'Doutor em Direitos Difusos',desc:'Advogado, Pós-Doutor pela UNIVALI. Ex-Presidente da Comissão de Meio Ambiente OAB/SC.',match:'Contencioso Ambiental'},
+    {ini:'TT',name:'Terence Trennepohl',role:'Pós-Doutor Harvard',desc:'Pós-Doutor pela Harvard Kennedy School. Atuou em Nova York. Especialista em tributação ambiental.',match:'ESG & Tributário'},
+    {ini:'LG',name:'Luciana Gil',role:'Sócia Bichara Advogados',desc:'Especialista em Mudanças Climáticas. Reconhecida por Chambers, Legal 500, WWL (2021–2025).',match:'Clima & Energia'}
+  ],
+  tecnico:[
+    {ini:'VS',name:'Victor Silvestre',role:'Eng. Ambiental & IA',desc:'17 anos em licenciamento. Fundador da SabIA — 1ª plataforma de IA ambiental do Brasil. Palestrou no MIT.',match:'Licenciamento + IA'},
+    {ini:'RS',name:'Rodrigo Sato',role:'Geólogo / Hidrogeologia',desc:'Graduado em Geologia (UFPR), Mestre em Geociências (USP). Especialista em hidrogeologia e licenciamentos.',match:'Gestão de Projetos'},
+    {ini:'TF',name:'Talden Farias',role:'Professor UFPB / UFPE',desc:'Doutor em Recursos Naturais. Autor de obras essenciais sobre licenciamento ambiental.',match:'Licenciamento Ambiental'},
+    {ini:'NT',name:'Natascha Trennepohl',role:'EHS Corporativo',desc:'Ex-EHS Executive Counsel da GE América Latina. Especialista em políticas climáticas e energias renováveis.',match:'EHS & Sustentabilidade'},
+    {ini:'EM',name:'Eder Marques',role:'CEO — IA Jurídica',desc:'CTO de startup Top 10 IA no Brasil. CEO da C2, aplica IA ao dia a dia de escritórios ambientais.',match:'Tecnologia & IA'},
+    {ini:'AV',name:'Andréa Vulcanis',role:'Sec. Estadual — SEMAD/GO',desc:'Procuradora Federal, 22+ anos em cargos de gestão ambiental. Ex-PGF do IBAMA.',match:'Gestão Ambiental'}
+  ],
+  servidor:[
+    {ini:'ML',name:'Mauren Lazzaretti',role:'Sec. SEMA/MT · Pres. ABEMA',desc:'Secretária de Meio Ambiente de MT. Presidente da ABEMA. Referência nacional em gestão pública ambiental.',match:'Políticas Públicas'},
+    {ini:'AV',name:'Andréa Vulcanis',role:'Sec. SEMAD/GO — AGU',desc:'Procuradora Federal, ex-Presidenta do IBAMA. 22+ anos em cargos de gestão e jurídico ambiental.',match:'Gestão Pública'},
+    {ini:'EF',name:'Eduardo F. Bim',role:'Proc. Federal — AGU',desc:'Ex-Presidente do IBAMA. Doutor em Direito do Estado (USP). Especialista em advocacia pública federal.',match:'Advocacia Pública'},
+    {ini:'AL',name:'Analú L. Longo',role:'Promotora de Justiça MPSC',desc:'Promotora no MPSC desde 2002. Professora da Escola do MP há 10 anos.',match:'MP & Controle Ambiental'},
+    {ini:'PL',name:'Paulo Locatelli',role:'Subprocurador-Geral MPSC',desc:'Mestre em Direito Ambiental (Univali/Alicante). Especialista em regularização fundiária.',match:'Direito Ambiental Público'},
+    {ini:'CG',name:'Charles Giacomini',role:'Juiz Federal — TRF4',desc:'Juiz Federal na Subseção de Florianópolis. Mestre em Ciência Jurídica.',match:'Magistratura Ambiental'}
+  ],
+  gestor:[
+    {ini:'WG',name:'Werner Grau',role:'Sócio Pinheiro Neto',desc:'Doutor em Direito Internacional Ambiental (USP). Referência em ESG e sustentabilidade corporativa.',match:'ESG & Estratégia'},
+    {ini:'NT',name:'Natascha Trennepohl',role:'EHS & Clima',desc:'Ex-EHS Executive Counsel da GE América Latina. Especialista em energias renováveis e políticas climáticas.',match:'Clima & Energia'},
+    {ini:'SP',name:'Samanta Pineda',role:'Consultora FGV / INSPER',desc:'Consultora jurídica da Frente Parlamentar da Agropecuária. Professora FGV e INSPER.',match:'Compliance & ESG'},
+    {ini:'LG',name:'Luciana Gil',role:'Sócia Bichara Advogados',desc:'Referência em Direito Ambiental Corporativo e Mudanças Climáticas. Chambers 2021–2025.',match:'Corporativo & Regulação'},
+    {ini:'AR',name:'Aldo Rebelo',role:'Ex-Min. Defesa · Relator Código Florestal',desc:'Conselheiro CEBRI. Ex-Ministro da Defesa e relator do Código Florestal (2009).',match:'Políticas & Legislação'},
+    {ini:'EM',name:'Eder Marques',role:'CEO — IA & Negócios',desc:'CTO Top 10 IA Brasil. CEO da C2. Especialista em automação para empresas e escritórios.',match:'Inovação & IA'}
+  ]
+};
+
+var AREA_INTRO={
+  juridico:'Com base no seu perfil de <strong>advogado(a)</strong>, selecionamos os palestrantes com maior relevância para sua atuação no contencioso, consultivo e estratégia ambiental:',
+  tecnico:'Com base no seu perfil de <strong>técnico(a) ambiental</strong>, selecionamos especialistas que vão impactar diretamente sua atuação prática em campo e projetos:',
+  servidor:'Com base no seu perfil de <strong>servidor(a) público(a)</strong>, selecionamos os palestrantes com maior aderência à gestão pública, fiscalização e políticas ambientais:',
+  gestor:'Com base no seu perfil de <strong>gestor(a)/empresário(a)</strong>, selecionamos os especialistas mais relevantes para ESG, estratégia corporativa e regulação ambiental:'
+};
+
+function buildSpeakers(){
+  goto('s-step4','eu','xu');
+  var list=SPEAKERS[S.area]||SPEAKERS.juridico;
+  document.getElementById('spkIntro').innerHTML=AREA_INTRO[S.area]||'';
+  var grid=document.getElementById('spkGrid');grid.innerHTML='';
+  list.forEach(function(sp,i){
+    var card=document.createElement('div');card.className='spk-card';
+    card.innerHTML='<div class="spk-avatar">'+sp.ini+'</div><div class="spk-name">'+sp.name+'</div><div class="spk-role">'+sp.role+'</div><div class="spk-desc">'+sp.desc+'</div><span class="spk-match">✓ '+sp.match+'</span>';
+    grid.appendChild(card);
+    setTimeout(function(){card.classList.add('vis');},100+i*90);
+  });
+  document.getElementById('moreBox').innerHTML='<strong>+130 palestrantes confirmados</strong> no DAE 2026 — estes são apenas alguns da sua área. Veja a grade completa em <a href="https://direitoambientalexperience.com.br/palestrantes" target="_blank" style="color:var(--gold-light);text-decoration:underline">direitoambientalexperience.com.br</a>';
+  pg(82);
+}
+
+document.getElementById('btnProposal').addEventListener('click',buildChat);
+
+// CHAT
+function buildChat(){
+  goto('s-transition','eu','xu');
+
+  var fn = S.name.split(' ')[0];
+
+  // Dor + solução por desafio
+  var DOR = {
+    crescer:    'Sem visibilidade no mercado, os melhores casos e oportunidades vão para quem já é referência. Isso muda quando você está no mesmo ambiente que quem define o setor.',
+    networking: 'Networking superficial não gera negócio. O que transforma carreira é a conversa no corredor com quem realmente decide — e isso só acontece quando você está na mesma sala.',
+    atualizacao:'A legislação ambiental muda rápido. Quem não acompanha perde segurança nas decisões, perde clientes e fica para trás. No DAE você sai atualizado por quem vive essa realidade todo dia.',
+    pratica:    'Teoria qualquer um tem. O que diferencia profissionais é saber como aplicar — com exemplos reais, casos concretos e quem já resolveu o que você está enfrentando agora.'
+  };
+
+  // Destaque de 2 palestrantes com seus temas por área
+  var SPK_HIGHLIGHT = {
+    juridico: [
+      {name:'Alexandre Sion',role:'Nº 1 Nacional em Direito Ambiental',tema:'Como construir autoridade e uma advocacia ambiental de alto nível'},
+      {name:'Curt Trennepohl',role:'Ex-Presidente do IBAMA',tema:'O que o regulador pensa — bastidores do licenciamento ambiental'}
+    ],
+    tecnico: [
+      {name:'Victor Silvestre',role:'Eng. Ambiental · Palestrante no MIT',tema:'IA aplicada ao licenciamento: como acelerar processos na prática'},
+      {name:'Talden Farias',role:'Doutor · Prof. UFPB/UFPE',tema:'Licenciamento ambiental: armadilhas reais e como evitá-las'}
+    ],
+    servidor: [
+      {name:'Mauren Lazzaretti',role:'Secretária SEMA/MT · Pres. ABEMA',tema:'Gestão pública ambiental de alto desempenho: casos reais'},
+      {name:'Eduardo F. Bim',role:'Ex-Presidente do IBAMA · Doutor USP',tema:'Fiscalização ambiental: limites legais e efetividade na prática'}
+    ],
+    gestor: [
+      {name:'Werner Grau',role:'Sócio Pinheiro Neto · Doutor USP',tema:'ESG na prática: implementação com segurança jurídica real'},
+      {name:'Natascha Trennepohl',role:'Ex-EHS GE América Latina',tema:'Como transformar sustentabilidade em vantagem competitiva'}
+    ]
+  };
+
+  var SALA = {juridico:'Sala Exclusiva para Advogados ⚖️',tecnico:'Sala Técnica Ambiental 🌿',servidor:'Sala do Serviço Público 🏛️',gestor:'Sala ESG & Negócios 📊'};
+  var AREA_LABEL = {juridico:'advogado(a)',tecnico:'técnico(a) ambiental',servidor:'servidor(a) público(a)',gestor:'gestor(a) / empresário(a)'};
+  var OBJ_LABEL = {conteudo:'conteúdo prático',networking:'networking qualificado',atualizacao:'atualização técnica',posicionamento:'posicionamento de carreira'};
+
+  var dor   = DOR[S.ch] || 'Evoluir na carreira exige estar no ambiente certo, com as pessoas certas.';
+  var spks  = SPK_HIGHLIGHT[S.area] || SPK_HIGHLIGHT.juridico;
+  var sala  = SALA[S.area] || 'Sala Principal';
+  var aLbl  = AREA_LABEL[S.area] || 'profissional';
+  var ob    = S.objs.map(function(o){return OBJ_LABEL[o]||o;}).join(' e ');
+
+  var spkMsg = '🎤 Dois nomes confirmados que vão falar diretamente com a sua realidade:<br><br>'
+    + '<strong>'+spks[0].name+'</strong> — <em>'+spks[0].role+'</em><br>'
+    + '"'+spks[0].tema+'"<br><br>'
+    + '<strong>'+spks[1].name+'</strong> — <em>'+spks[1].role+'</em><br>'
+    + '"'+spks[1].tema+'"';
+
+  var msgs=[
+    {d:0,    t:'Perfeito, <strong>'+fn+'</strong>! Com base no que você respondeu já consigo montar algo bem específico pra você. 🎯'},
+    {d:1200, t:'Você é <strong>'+aLbl+'</strong> e está buscando principalmente <strong>'+ob+'</strong>. Faz todo sentido — e é exatamente onde o DAE entrega.'},
+    {d:2600, t:dor},
+    {d:4000, t:spkMsg},
+    {d:5600, t:'E esses são só dois dos <strong>+130 especialistas</strong> confirmados, todos com conteúdo prático e direto ao ponto. Você vai ter acesso à <strong>'+sala+'</strong> — criada especificamente para o seu perfil. 💚'},
+    {d:7000, t:'Preparei sua <strong>proposta exclusiva</strong> com desconto já ativado. Dá uma olhada 👇'},
+    {d:8200, isBtn:true}
+  ];
+  var w=document.getElementById('cwrap');w.innerHTML='';
+  msgs.forEach(function(m){
+    if(!m.isBtn){
+      setTimeout(function(){
+        var tr=document.createElement('div');tr.className='mrow';
+        tr.innerHTML='<div class="av">A</div><div class="typd"><span></span><span></span><span></span></div>';
+        w.appendChild(tr);setTimeout(function(){tr.classList.add('vis');},30);
+        setTimeout(function(){
+          tr.remove();var r=document.createElement('div');r.className='mrow';
+          r.innerHTML='<div class="av">A</div><div class="bub">'+m.t+'</div>';
+          w.appendChild(r);setTimeout(function(){r.classList.add('vis');},30);
+          w.scrollTop=w.scrollHeight;
+        },640);
+      },m.d);
+    } else {
+      setTimeout(function(){
+        var b=document.createElement('div');
+        b.style.cssText='text-align:center;margin-top:1.5rem;opacity:0;transform:translateY(14px);transition:all .4s ease';
+        b.innerHTML='<button class="bg" id="btnShowProposal">Ver minha proposta exclusiva →</button>';
+        w.appendChild(b);setTimeout(function(){b.style.opacity='1';b.style.transform='none';},80);
+        setTimeout(function(){var btn=document.getElementById('btnShowProposal');if(btn)btn.addEventListener('click',buildProposal);},200);
+      },m.d);
+    }
+  });
+  pg(92);
+}
+
+// SAVE LEAD
+async function saveLeadData(){
+  var areaLabel={juridico:'Área Jurídica',tecnico:'Técnico Ambiental',servidor:'Serviço Público',gestor:'Gestor/Empresário'};
+  var chLabel={crescer:'Crescer e se posicionar',networking:'Ampliar networking',atualizacao:'Acompanhar tendências',pratica:'Teoria → prática'};
+  var objLabel={conteudo:'Conteúdo prático',networking:'Networking',atualizacao:'Atualização técnica',posicionamento:'Posicionamento'};
+  var lead={
+    id:'lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    nome:S.name,area:areaLabel[S.area]||S.area,
+    objetivos:S.objs.map(function(o){return objLabel[o]||o;}).join(' | '),
+    desafio:chLabel[S.ch]||S.ch,
+    data:new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),ts:Date.now()
+  };
+  try{
+    var fd=new FormData();
+    fd.append('entry.984295417',lead.nome);fd.append('entry.592708848',lead.area);
+    fd.append('entry.1106248676',lead.objetivos);fd.append('entry.1124900577',lead.desafio);
+    fetch('https://docs.google.com/forms/d/e/1FAIpQLSfQD_DX9NT-HRz68ijX4QDkgyO_ywqMFGKbwqryeZi86AvRsg/formResponse',{method:'POST',mode:'no-cors',body:fd});
+  }catch(e){}
+  try{
+    var leads=[];
+    try{var r=await window.storage.get('dae2026_leads',true);if(r)leads=JSON.parse(r.value);}catch(e){}
+    leads.push(lead);await window.storage.set('dae2026_leads',JSON.stringify(leads),true);
+  }catch(e){}
+}
+
+// PROPOSAL
+function buildProposal(){
+  pg(100);saveLeadData();
+  var ad={
+    juridico:{tags:['✓ Sala dos Advogados','✓ Sala Principal','✓ 4 Salas Simultâneas'],ins:'Como <strong>advogado(a)</strong>, você terá acesso à sala exclusiva para juristas — jurisprudência ambiental, licenciamento, estratégia processual e os cases práticos mais relevantes do setor.'},
+    tecnico:{tags:['✓ Sala Técnica','✓ Sala Principal','✓ 4 Salas Simultâneas'],ins:'Como <strong>técnico(a) ambiental</strong>, a sala temática foi criada para você: workshops práticos, ferramentas de campo, estudos de caso e as principais mudanças normativas.'},
+    servidor:{tags:['✓ Sala do Serviço Público','✓ Sala Principal','✓ 4 Salas Simultâneas'],ins:'Como <strong>servidor(a) público(a)</strong>, o DAE dedica uma sala inteira às especificidades do setor — fiscalização, licenciamento, gestão ambiental pública e atualizações regulatórias.'},
+    gestor:{tags:['✓ Sala ESG & Negócios','✓ Sala Principal','✓ 4 Salas Simultâneas'],ins:'Como <strong>gestor(a)/empresário(a)</strong>, o DAE conecta você com os maiores especialistas em ESG, compliance ambiental e regulação — para decisões estratégicas de alto impacto.'}
+  };
+  var bens=['Acesso aos 3 dias completos — 29, 30 e 31 de outubro','+95 palestras com +130 especialistas de todo o Brasil','4 salas temáticas simultâneas — você escolhe o que assistir','Workshops, oficinas práticas, painéis e talks','Kit participante exclusivo DAE 2026','Certificado de participação','Networking com os maiores profissionais da área ambiental do país'];
+  var info=ad[S.area]||ad.juridico;
+  document.getElementById('pname').textContent=S.name.split(' ')[0];
+  document.getElementById('stags').innerHTML=info.tags.map(function(t){return'<span class="tag">'+t+'</span>';}).join('');
+  document.getElementById('ibox').innerHTML=info.ins+' Pelo que entendemos da sua jornada, o DAE 2026 é exatamente o próximo passo que você precisa.';
+  document.getElementById('blist').innerHTML=bens.map(function(b){return'<li class="bitem"><span class="ck">✓</span><span>'+b+'</span></li>';}).join('');
+  goto('s-proposal','es','xu');
+  setTimeout(function(){
+    document.querySelectorAll('.bitem').forEach(function(el,i){setTimeout(function(){el.classList.add('vis');},i*80);});
+    confetti();animPrice();
+  },600);
+}
+
+// PRICE COUNTER
+function animPrice(){
+  var el=document.getElementById('pnum'),tgt=139,st=157,dur=1100,t0=Date.now();
+  function tick(){var p=Math.min((Date.now()-t0)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(st+(tgt-st)*e);if(p<1){requestAnimationFrame(tick);}else{el.textContent='139';var b=el.closest('.pboxn');b.style.transition='transform .2s ease';b.style.transform='scale(1.06)';setTimeout(function(){b.style.transform='scale(1)';},220);}}
+  setTimeout(tick,350);
+}
+
+// CONFETTI
+function confetti(){
+  var cs=['#c9a84c','#e8c96a','#52b788','#40916c','#fff'];
+  for(var i=0;i<50;i++){(function(){
+    var el=document.createElement('div');el.className='cpc';
+    el.style.cssText='left:'+Math.random()*100+'vw;top:-10px;background:'+cs[Math.floor(Math.random()*cs.length)]+';width:'+(Math.random()*8+4)+'px;height:'+(Math.random()*8+4)+'px;border-radius:'+(Math.random()>.5?'50%':'2px')+';animation-duration:'+(Math.random()*1.5+1.5)+'s;animation-delay:'+(Math.random()*.8)+'s';
+    document.body.appendChild(el);setTimeout(function(){el.remove();},3500);
+  })();}
+}
+
+} // end init
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
